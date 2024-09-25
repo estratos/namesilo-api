@@ -1,8 +1,8 @@
 {
-  "name": "estratos/sie-banxico",
+  "name": "estratos/namesilo-api",
   "type": "symfony-bundle",
-  "description": "Banxico SIE REST API Client for Symfony Framework",
-  "keywords": ["php", "symfony", "banxico sie", "exchange rate"],
+  "description": "Namesilo REST API Client for Symfony Framework",
+  "keywords": ["php", "symfony", "namesilo", "domain registrar"],
   "license": "MIT",
   "authors": [
     {
@@ -11,33 +11,29 @@
     }
   ],
   "autoload": {
-    "psr-4": { "Estratos\\SieBanxico\\": "src/" }
+    "psr-4": { "Estratos\\NamesiloApi\\": "src/" }
   },
   "autoload-dev": {
     "psr-4": {
-      "Estratos\\SieBanxico\\Tests\\": "tests/"
+      
     }
   },
   "require-dev": {
     "symfony/http-kernel": "^4.0",   
-    "squizlabs/php_codesniffer": "^3.10",
-    "phpstan/phpstan": "^1.12",
-    "sebastian/phpcpd": "^6.0",
-    "phpunit/phpunit": "^9.6"
+    
   },
   "require": {
     "php": ">=8.1",
     "symfony/config": "^7.1",
     "symfony/dependency-injection": "^7.1",
-    "symfony/yaml": "^7.1",
-    "php-http/guzzle7-adapter": "^1.0",
-    "xint0/banxico-php": "^2.0"
+    "symfony/yaml": "^7.1"
+    
   },
 
   "repositories": [
     {
         "type": "git",
-        "url": "https://github.com/estratos/sie-banxico.git"
+        "url": "https://github.com/estratos/namesilo-api.git"
     }],
   "config": {
     "allow-plugins": {
