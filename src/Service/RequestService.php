@@ -1,6 +1,6 @@
 <?php
 
-namespace Estratos\NamesiloApiBundle;
+namespace Estratos\NamesiloApi\NamesiloApiBundle;
 
 
 

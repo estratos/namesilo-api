@@ -1,6 +1,6 @@
 <?php
 // src/AcmeBlogBundle.php
-namespace Estratos\NamesiloApiBundle;
+namespace Estratos\NamesiloApi\NamesiloApiBundle;
 
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
