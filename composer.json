@@ -11,7 +11,7 @@
     }
   ],
   "autoload": {
-    "psr-4": { "Estratos\\NamesiloApi\\": "src/" }
+    "psr-4": { "Estratos\\NamesiloApi\\NamesiloApiBundle": "src/" }
   },
   "autoload-dev": {
     "psr-4": {
