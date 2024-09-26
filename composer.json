@@ -19,7 +19,7 @@
     }
   },
   "require-dev": {
-    "symfony/http-kernel": "^4.0",   
+    "symfony/http-kernel": "^4.0"   
     
   },
   "require": {
