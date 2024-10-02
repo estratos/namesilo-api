@@ -3,6 +3,7 @@
 namespace Estratos\NamesiloApi;
 
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use Estratos\NamesiloApi\Service\RequestService;
 
 class NamesiloApi extends AbstractBundle
 

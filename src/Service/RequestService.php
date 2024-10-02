@@ -1,6 +1,6 @@
 <?php
 
-namespace Estratos\NamesiloApi;
+namespace Estratos\NamesiloApi\Service;
 
 
 
