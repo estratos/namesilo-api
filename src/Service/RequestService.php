@@ -26,8 +26,10 @@ class RequestService
 
     public function RequestApi() {
         $ch = curl_init($this->endpoint);
+        //curl_setopt($ch, CURLOPT_HEADER, 1);
+        //curl_setopt($ch, CURLINFO_HEADER_OUT, true);
         if (isset($this->metodo))    {
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->metodo);    
+        //curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->metodo);    
         }
         if (isset($this->json)) {
         curl_setopt($ch, CURLOPT_POSTFIELDS, $this->json);
@@ -48,8 +50,11 @@ class RequestService
         }
         curl_setopt($ch, CURLOPT_TIMEOUT, 20);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
+        //dd($ch);
         $result = curl_exec($ch);
         curl_close($ch);
+        //dd(curl_getinfo($ch));
+        //dd($result);
         return $result;
     }
 }

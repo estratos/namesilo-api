@@ -17,12 +17,12 @@ class NamesiloApi extends AbstractBundle
 
     public function getPrices()
     {
-
+        $params = '?'.'version=1'.'&'.'type=json'.'&'.'key='.$this->tokenkey;
         $endpoint = self::BASE_URL . 'getPrices';
-        $json = json_encode(['version' => '1', 'type' => 'json', 'key' => $this->tokenkey]);
-
+        $endpoint = $endpoint . $params;
+       
         ///// https://www.namesilo.com/api/getPrices?version=1&type=xml&key=12345
-        $service = new RequestService($endpoint, null, $json, null, false);
+        $service = new RequestService($endpoint, null , null, null, false);
 
 
         return $service->RequestApi();
@@ -30,12 +30,13 @@ class NamesiloApi extends AbstractBundle
 
     public function registerDomain()
     {
-
+        $params = '?'.'version=1'.'&'.'type=json'.'&'.'key='.$this->tokenkey;
         $endpoint = self::BASE_URL . 'registerDomain';
+        $endpoint = $endpoint . $params;
         $json = json_encode(['version' => '1', 'type' => 'json', 'key' => $this->tokenkey]);
 
         //// https://www.namesilo.com/api/registerDomain?version=1&type=xml&key=12345&domain=namesilo.com&years=2&private=1&auto_renew=1
-        $service = new RequestService($endpoint, null, $json, null, false);
+        $service = new RequestService($endpoint, null, null, null, false);
 
         return $service->RequestApi();
     }
@@ -43,10 +44,13 @@ class NamesiloApi extends AbstractBundle
 
     public function renewDomain()
 
-    {   $endpoint = self::BASE_URL . 'renewDomain';
-        $json = json_encode(['version' => '1', 'type' => 'json', 'key' => $this->tokenkey]);
+    {   
+        $params = '?'.'version=1'.'&'.'type=json'.'&'.'key='.$this->tokenkey;
+        $endpoint = self::BASE_URL . 'renewDomain';
+        $endpoint = $endpoint . $params;
+        
         //// https://www.namesilo.com/api/renewDomain?version=1&type=xml&key=12345&domain=namesilo.com&years=2
-        $service = new RequestService($endpoint, null, $json, null, false);
+        $service = new RequestService($endpoint, null, null, null, false);
 
         return $service->RequestApi();
     }
