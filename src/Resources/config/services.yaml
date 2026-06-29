@@ -1,0 +1,67 @@
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # ============================================
+    # Cliente REST
+    # ============================================
+    Estratos\DomainNameApi\Infrastructure\Http\Client\RestClient:
+        arguments:
+            $apiKey: '%domainname_api.api_key%'
+            $resellerId: '%domainname_api.reseller_id%'
+            $endpoint: '%domainname_api.rest.endpoint%'
+            $verifySsl: '%domainname_api.rest.verify_ssl%'
+            $timeout: '%domainname_api.rest.timeout%'
+            $retryAttempts: '%domainname_api.rest.retry_attempts%'
+
+    # ============================================
+    # Proveedor REST
+    # ============================================
+    Estratos\DomainNameApi\Infrastructure\Provider\RestProvider:
+        arguments:
+            $client: '@Estratos\DomainNameApi\Infrastructure\Http\Client\RestClient'
+            $config:
+                default_nameservers: '%domainname_api.default_nameservers%'
+
+    # ============================================
+    # Domain Provider Interface
+    # ============================================
+    Estratos\DomainNameApi\Domain\Contract\DomainProviderInterface:
+        alias: '%domainname_api.provider_service%'
+        public: true
+
+    # ============================================
+    # Alias para los proveedores
+    # ============================================
+    domainname_api.provider.rest:
+        alias: Estratos\DomainNameApi\Infrastructure\Provider\RestProvider
+        public: true
+
+    domainname_api.provider.soap:
+        alias: Estratos\DomainNameApi\Infrastructure\Provider\SoapProvider
+        public: true
+
+    # ============================================
+    # Casos de Uso
+    # ============================================
+    Estratos\DomainNameApi\Application\UseCase\CheckDomainUseCase: ~
+    Estratos\DomainNameApi\Application\UseCase\RegisterDomainUseCase: ~
+    Estratos\DomainNameApi\Application\UseCase\GetBalanceUseCase: ~
+    Estratos\DomainNameApi\Application\UseCase\ListDomainsUseCase: ~
+    Estratos\DomainNameApi\Application\UseCase\GetTldsUseCase: ~
+
+    # ============================================
+    # Comandos
+    # ============================================
+    Estratos\DomainNameApi\Command\:
+        resource: '../../Command'
+        tags: ['console.command']
+
+    # ============================================
+    # Controladores
+    # ============================================
+    Estratos\DomainNameApi\Controller\:
+        resource: '../../Controller'
+        tags: ['controller.service_arguments']
