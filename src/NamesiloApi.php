@@ -1,118 +1,36 @@
 <?php
-// src/AcmeBlogBundle.php
-namespace Estratos\NamesiloApi;
 
+declare(strict_types=1);
+
+namespace Estratos\NameSiloBundle;
+
+use Estratos\NameSiloBundle\DependencyInjection\NameSiloExtension;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-use Estratos\NamesiloApi\Service\RequestService;
 
-class NamesiloApi extends AbstractBundle
-
+final class NameSiloBundle extends AbstractBundle
 {
+    private const EXTENSION_ALIAS = 'namesilo';
 
-    private string $tokenkey;
-
-
-    public const BASE_URL = 'https://www.namesilo.com/api/';
-
-
-    public function getPrices()
+    public function getContainerExtension(): ?ExtensionInterface
     {
+        if (null === $this->extension) {
+            $this->extension = new NameSiloExtension();
+        }
 
-        $endpoint = self::BASE_URL . 'getPrices';
-        $endpoint = $endpoint . $this->getParams();
-
-        ///// https://www.namesilo.com/api/getPrices?version=1&type=xml&key=12345
-        $service = new RequestService($endpoint, null, null, null, false);
-
-
-        return $service->RequestApi();
+        return $this->extension;
     }
 
-    public function registerDomain()
+    public function build(ContainerBuilder $container): void
     {
+        parent::build($container);
 
-        $endpoint = self::BASE_URL . 'registerDomain';
-        $endpoint = $endpoint . $this->getParams();
-
-        //// https://www.namesilo.com/api/registerDomain?version=1&type=xml&key=12345&domain=namesilo.com&years=2&private=1&auto_renew=1
-        $service = new RequestService($endpoint, null, null, null, false);
-
-        return $service->RequestApi();
+        // Register compiler passes if needed in the future
     }
 
-
-    public function renewDomain()
-
+    public function getPath(): string
     {
-        $endpoint = self::BASE_URL . 'renewDomain';
-        $endpoint = $endpoint . $this->getParams();
-
-        //// https://www.namesilo.com/api/renewDomain?version=1&type=xml&key=12345&domain=namesilo.com&years=2
-        $service = new RequestService($endpoint, null, null, null, false);
-
-        return $service->RequestApi();
-    }
-
-
-    public function listDomains()
-    {
-
-
-        $endpoint = self::BASE_URL . 'listDomains';
-        $endpoint = $endpoint . $this->getParams();
-        // https://www.namesilo.com/api/listDomains?version=1&type=xml&key=12345&withBid=1&pageSize=10
-
-        $service = new RequestService($endpoint, null, null, null, false);
-
-        return $service->RequestApi();
-    }
-
-    public function getAccountBalance()
-    {
-
-        $endpoint = self::BASE_URL . 'getAccountBalance';
-        $endpoint = $endpoint . $this->getParams();
-        //https: //www.namesilo.com/api/getAccountBalance?version=1&type=xml&key=12345
-
-        $service = new RequestService($endpoint);
-
-        return $service->RequestApi();
-    }
-
-
-    public function addAccountFunds(float $amount, int $paymentid)
-    {
-
-        /// validate amount
-        if (!is_float($amount)) return 'amount must be float type';
-        /// we may limit to 2 digit precision
-
-        $endpoint = self::BASE_URL . 'addAccountFunds';
-        $endpoint = $endpoint . $this->getParams() . '&amount=' . (string)$amount . '&paiment_id' . (string)$paymentid;
-        //  https://www.namesilo.com/api/addAccountFunds?version=1&type=xml&key=12345&amount=65.43&payment_id=123
-
-
-        $service = new RequestService($endpoint);
-
-        return $service->RequestApi();
-    }
-
-
-    private function getParams()
-    {
-
-        return '?' . 'version=1' . '&' . 'type=json' . '&' . 'key=' . $this->tokenkey;
-    }
-
-    /**
-     * Set the value of tokenkey
-     *
-     * @return  self
-     */
-    public function setTokenkey($tokenkey)
-    {
-        $this->tokenkey = $tokenkey;
-
-        return $this;
+        return \dirname(__DIR__);
     }
 }
