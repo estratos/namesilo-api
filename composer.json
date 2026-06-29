@@ -1,43 +1,76 @@
 {
-  "name": "estratos/namesilo-api",
-  "type": "symfony-bundle",
-  "description": "Namesilo REST API Client for Symfony Framework",
-  "keywords": ["php", "symfony", "namesilo", "domain registrar"],
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Julio Rodriguez",
-      "email": "julio.stratos@gmail.com"
+    "name": "estratos/namesilo-bundle",
+    "type": "symfony-bundle",
+    "description": "NameSilo API Bundle for Symfony - Enterprise-grade domain registrar integration",
+    "keywords": [
+        "symfony",
+        "bundle",
+        "namesilo",
+        "domain",
+        "registrar",
+        "dns",
+        "api",
+        "provider"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Julio Rodriguez",
+            "email": "julio.stratos@gmail.com",
+            "role": "Lead Developer"
+        }
+    ],
+    "require": {
+        "php": ">=8.3",
+        "symfony/framework-bundle": "^7.0",
+        "symfony/http-client": "^7.0",
+        "symfony/dependency-injection": "^7.0",
+        "symfony/config": "^7.0",
+        "symfony/event-dispatcher": "^7.0",
+        "symfony/http-kernel": "^7.0",
+        "psr/log": "^3.0",
+        "estratos/domain-api-interface": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5",
+        "phpstan/phpstan": "^1.10",
+        "friendsofphp/php-cs-fixer": "^3.49",
+        "symfony/phpunit-bridge": "^7.0",
+        "symfony/stopwatch": "^7.0",
+        "php-http/mock-client": "^1.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Estratos\\NameSiloBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Estratos\\NameSiloBundle\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": false
+        },
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "preferred-install": "dist"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "scripts": {
+        "phpstan": "phpstan analyse src tests --level=max",
+        "php-cs-fixer": "php-cs-fixer fix --dry-run --diff",
+        "php-cs-fixer-fix": "php-cs-fixer fix",
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage"
+    },
+    "scripts-descriptions": {
+        "phpstan": "Run PHPStan at maximum level",
+        "php-cs-fixer": "Check coding standards",
+        "php-cs-fixer-fix": "Fix coding standards",
+        "test": "Run PHPUnit tests",
+        "test-coverage": "Generate test coverage report"
     }
-  ],
-  "autoload": {
-    "psr-4": { "Estratos\\NamesiloApi\\": "src/" }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      
-    }
-  },
-  "require-dev": {
-    "symfony/http-kernel": "^4.0"   
-    
-  },
-  "require": {
-    "php": ">=8.1",
-    "symfony/config": "^7.1",
-    "symfony/dependency-injection": "^7.1",
-    "symfony/yaml": "^7.1"
-    
-  },
-
-  "repositories": [
-    {
-        "type": "git",
-        "url": "https://github.com/estratos/namesilo-api.git"
-    }],
-  "config": {
-    "allow-plugins": {
-      "php-http/discovery": true
-    }
-  }
 }
