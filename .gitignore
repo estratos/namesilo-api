@@ -38,6 +38,14 @@
 # PHPUnit
 /app/phpunit.xml
 /phpunit.xml
+/.phpunit.cache/
+
+# Local tooling
+/.phpstan.log
+/.phpunit.log
+/.composer-install.log
+/.composer-home/
+/.composer-cache/
 
 # Build data
 /build/

@@ -6,8 +6,12 @@ namespace Estratos\NameSiloBundle\Exception;
 
 class ValidationException extends ApiException
 {
+    /** @var array<string, mixed> */
     private readonly array $errors;
 
+    /**
+     * @param array<string, mixed> $errors
+     */
     public function __construct(
         string $message,
         array $errors = [],
@@ -19,6 +23,9 @@ class ValidationException extends ApiException
         parent::__construct($message, $endpoint, 422, $requestId, $previous);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getErrors(): array
     {
         return $this->errors;

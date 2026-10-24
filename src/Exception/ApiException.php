@@ -11,7 +11,8 @@ class ApiException extends \RuntimeException
         private readonly ?string $endpoint = null,
         private readonly ?int $statusCode = null,
         private readonly ?string $requestId = null,
-        ?\Throwable $previous = null
+        ?\Throwable $previous = null,
+        private readonly ?int $apiCode = null
     ) {
         parent::__construct($message, 0, $previous);
     }
@@ -29,5 +30,13 @@ class ApiException extends \RuntimeException
     public function getRequestId(): ?string
     {
         return $this->requestId;
+    }
+
+    /**
+     * Numeric code returned by the NameSilo API, when available.
+     */
+    public function getApiCode(): ?int
+    {
+        return $this->apiCode;
     }
 }

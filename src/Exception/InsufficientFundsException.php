@@ -19,13 +19,17 @@ class InsufficientFundsException extends ApiException
     ) {
         $this->requiredAmount = $requiredAmount;
         $this->availableBalance = $availableBalance;
-        
-        $message = sprintf(
+
+        $formatted = sprintf(
             'Insufficient funds. Required: $%s, Available: $%s',
             number_format($requiredAmount, 2),
             number_format($availableBalance, 2)
         );
-        
+
+        $message = 'Insufficient funds in account.' === $message
+            ? $formatted
+            : $formatted . ' ' . $message;
+
         parent::__construct($message, $endpoint, 402, $requestId, $previous);
     }
 

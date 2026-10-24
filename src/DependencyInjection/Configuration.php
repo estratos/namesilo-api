@@ -39,7 +39,7 @@ final class Configuration implements ConfigurationInterface
                     ->min(5)
                     ->max(120)
                     ->info('HTTP request timeout in seconds')
-                    ->example(30)
+                    ->example('30')
                 ->end()
                 
                 ->scalarNode('version')

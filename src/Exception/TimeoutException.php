@@ -16,7 +16,11 @@ class TimeoutException extends ApiException
         ?\Throwable $previous = null
     ) {
         $this->timeout = $timeout;
-        $message = sprintf('Request timed out after %d seconds.', $timeout);
+        $formatted = sprintf('Request timed out after %d seconds.', $timeout);
+        $message = 'Request timed out.' === $message
+            ? $formatted
+            : $formatted . ' ' . $message;
+
         parent::__construct($message, $endpoint, 408, $requestId, $previous);
     }
 

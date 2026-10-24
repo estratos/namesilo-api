@@ -4,76 +4,134 @@
 [![Symfony Version](https://img.shields.io/badge/symfony-%3E%3D7.0-333333.svg)](https://symfony.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Enterprise-grade NameSilo API integration bundle for Symfony 7.4+ applications.
+NameSilo API integration for Symfony, built on top of the contracts from [`estratos/domain-api-interface`](https://github.com/estratos/domain-api-interface).
+
+> **Status:** the core implementation is complete: HTTP client, response mapper, the 7 contract services, events, cache, retries and tests. The package is not yet published on Packagist, so install it through a VCS repository (see [Installation](#installation)).
 
 ## Overview
 
-This bundle provides a complete, enterprise-ready integration with the NameSilo API for Symfony applications. It implements the contracts defined in [estratos/domain-api-interface](https://github.com/estratos/domain-api-interface), making it pluggable into any application that uses the common domain provider interfaces.
+The bundle adapts the NameSilo API to a provider-agnostic domain API:
+
+- Domain registration, renewal, transfer and queries.
+- DNS record management.
+- Contact profiles.
+- Account balance and prices.
+- WHOIS privacy.
+- Domain lock/unlock.
+- Name server changes.
+
+Applications depend on the interfaces, not on NameSilo. Another provider can replace this bundle without changing business logic.
 
 ## Architecture
-┌─────────────────────────────────────────────────┐
-│ Domain API Interface Bundle │
-│ (Contracts: DomainProviderInterface, etc.) │
-└──────────────────┬──────────────────────────────┘
-│ Implements
-┌──────────────────▼──────────────────────────────┐
-│ NameSilo Bundle │
-│ - NameSiloClient (HTTP client) │
-│ - Services (Domain, DNS, Contact, etc.) │
-│ - ResponseMapper (JSON→DTO) │
-│ - Events (DomainRegistered, etc.) │
-└──────────────────┬──────────────────────────────┘
-│ Uses
-┌──────────────────▼──────────────────────────────┐
-│ NameSilo API │
-│ (https://www.namesilo.com/api/) │
-└─────────────────────────────────────────────────┘
 
-text
+```text
+Application
+    │ injects DomainProviderInterface, DNSProviderInterface, ...
+    ▼
+estratos/domain-api-interface
+    │ contracts, DTOs and request objects
+    ▼
+estratos/namesilo-bundle
+    ├── DomainService, DNSService, ContactService, AccountService,
+    │   PrivacyService, LockService, NameServerService
+    ├── ResponseMapper
+    ├── NameSiloClient (HTTP, JSON/XML, retry, cache, logging)
+    └── EventDispatcher
+    │
+    ▼
+NameSilo API (https://www.namesilo.com/api/)
+```
 
 ## Features
 
-- ✅ **Contract-Based Architecture** - Implements domain-api-interface contracts
-- ✅ **Full API Coverage** - All NameSilo endpoints implemented
-- ✅ **Immutable DTOs** - Read-only data transfer objects
-- ✅ **Strong Typing** - PHP 8.3+ with strict_types
-- ✅ **Event-Driven** - Symfony events for domain operations
-- ✅ **Comprehensive Logging** - PSR-3 compliant with sensitive data masking
-- ✅ **Retry Logic** - Automatic retry with exponential backoff
-- ✅ **Cache Support** - Configurable caching for non-mutating operations
-- ✅ **Error Handling** - Specific exceptions for different scenarios
-- ✅ **Sandbox Mode** - Test integration without real transactions
-- ✅ **90%+ Test Coverage** - Fully tested with PHPUnit
+- ✅ **Contract-based** — implements 23 methods across 7 interfaces.
+- ✅ **Full transport layer** — GET requests, JSON and XML responses, error mapping.
+- ✅ **Typed errors** — authentication, insufficient funds, invalid domain/contact, rate limit, timeout, DNS and validation exceptions.
+- ✅ **Events** — 13 domain/DNS/contact/privacy/lock events.
+- ✅ **Cache** — PSR-6 cache for read-only endpoints, with invalidation after mutations.
+- ✅ **Retries** — configurable HTTP retries with exponential backoff.
+- ✅ **Logging** — PSR-3 with API key masking.
+- ✅ **Sandbox** — switches to the NameSilo sandbox host when requested.
+- ✅ **Tests** — PHPUnit suite with `MockHttpClient`; PHPStan level `max`.
+
+## Requirements
+
+- PHP 8.3 or newer.
+- Symfony 7.x.
+- `ext-simplexml` only if you use `response_type: xml`.
 
 ## Installation
 
+The package is not on Packagist yet. Add the repository to the consuming application:
+
+```json
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/estratos/namesilo-api"
+        }
+    ],
+    "require": {
+        "estratos/namesilo-bundle": "dev-main"
+    }
+}
+```
+
 ```bash
-composer require estratos/namesilo-bundle
-Configuration
-1. Add to your .env file:
-env
+composer update estratos/namesilo-bundle
+```
+
+Register the bundle:
+
+```php
+// config/bundles.php
+return [
+    // ...
+    Estratos\NameSiloBundle\NameSiloBundle::class => ['all' => true],
+];
+```
+
+Add the API key to `.env` or to Symfony secrets:
+
+```dotenv
 NAMESILO_API_KEY=your_api_key_here
 NAMESILO_SANDBOX=false
-2. Create config/packages/namesilo.yaml:
-yaml
+```
+
+Create `config/packages/namesilo.yaml`:
+
+```yaml
 namesilo:
     api_key: '%env(NAMESILO_API_KEY)%'
     sandbox: '%env(bool:NAMESILO_SANDBOX)%'
+```
+
+That is the minimal configuration. Every other option has a default.
+
+## Configuration
+
+Full reference:
+
+```yaml
+namesilo:
+    api_key: '%env(NAMESILO_API_KEY)%'
+    sandbox: false
     base_url: 'https://www.namesilo.com/api/'
     timeout: 30
     version: '1'
-    response_type: 'json'
-    
+    response_type: 'json' # json or xml
+
     logging:
         enabled: true
         level: 'info'
         mask_sensitive: true
-    
+
     retry:
         max_retries: 3
         delay_ms: 1000
         http_codes: [429, 500, 502, 503, 504]
-    
+
     cache:
         enabled: true
         ttl_seconds: 300
@@ -81,227 +139,202 @@ namesilo:
             - 'getPrices'
             - 'getAccountBalance'
             - 'listDomains'
-    
+            - 'listDomainsByExpirationDate'
+            - 'dnsListRecords'
+            - 'contactList'
+
     events:
         enabled: true
         events_to_dispatch:
             - 'domain_registered'
             - 'domain_renewed'
+            - 'domain_transferred'
             - 'dns_record_added'
-3. Register the bundle in config/bundles.php:
-php
-return [
-    // ...
-    Estratos\NameSiloBundle\NameSiloBundle::class => ['all' => true],
-];
-Usage Examples
-Domain Registration
-php
-<?php
+            - 'dns_record_updated'
+            - 'dns_record_deleted'
+            - 'contact_added'
+            - 'contact_updated'
+            - 'contact_deleted'
+            - 'privacy_added'
+            - 'privacy_removed'
+            - 'domain_locked'
+            - 'domain_unlocked'
+```
 
-namespace App\Controller;
+See the [configuration reference](docs/02-configuracion.md) for defaults, ranges and caveats.
 
+## Usage
+
+### Domain registration
+
+```php
 use Estratos\DomainApiInterface\Domain\DomainProviderInterface;
 use Estratos\DomainApiInterface\Request\RegisterDomainRequest;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class DomainController extends AbstractController
+final class DomainController
 {
-    public function register(DomainProviderInterface $domainProvider)
+    public function register(DomainProviderInterface $domainProvider): void
     {
-        // Check availability first
         $availability = $domainProvider->checkAvailability('example.com');
-        
+
         if (!$availability->isAvailable()) {
-            $this->addFlash('error', 'Domain is not available');
-            return $this->redirectToRoute('domain_search');
+            throw new \RuntimeException('Domain is not available.');
         }
-        
-        $request = new RegisterDomainRequest(
+
+        $result = $domainProvider->register(new RegisterDomainRequest(
             domain: 'example.com',
-            years: 2,
-            contactId: 'CONTACT_123',
+            years: 1,
+            contactId: '12345',
             private: true,
             autoRenew: true,
-            nameserver1: 'ns1.namesilo.com',
-            nameserver2: 'ns2.namesilo.com'
-        );
-        
-        try {
-            $result = $domainProvider->register($request);
-            
-            if ($result->isSuccess()) {
-                $this->addFlash('success', sprintf(
-                    'Domain %s registered successfully. Order ID: %s',
-                    $result->domain,
-                    $result->orderId
-                ));
-            }
-        } catch (InsufficientFundsException $e) {
-            $this->addFlash('error', $e->getMessage());
-        } catch (AuthenticationException $e) {
-            $this->addFlash('error', 'Authentication failed. Check your API key.');
+        ));
+
+        if (!$result->isSuccess()) {
+            throw new \RuntimeException($result->errorMessage ?? 'Registration failed.');
         }
     }
 }
-DNS Management
-php
-<?php
+```
 
-namespace App\Controller;
+### DNS records
 
+```php
 use Estratos\DomainApiInterface\DNS\DNSProviderInterface;
 use Estratos\DomainApiInterface\Enum\RecordType;
 use Estratos\DomainApiInterface\Request\AddDnsRecordRequest;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class DNSController extends AbstractController
+final class DnsController
 {
-    public function addRecord(DNSProviderInterface $dnsProvider)
+    public function addRecord(DNSProviderInterface $dnsProvider): void
     {
-        $request = new AddDnsRecordRequest(
+        $record = $dnsProvider->addRecord(new AddDnsRecordRequest(
             domain: 'example.com',
             host: 'www',
             type: RecordType::A,
-            value: '192.168.1.1',
-            ttl: 3600
-        );
-        
-        try {
-            $record = $dnsProvider->addRecord($request);
-            
-            $this->addFlash('success', sprintf(
-                'DNS record %s (%s) added successfully',
-                $record->host,
-                $record->type->value
-            ));
-            
-            return $this->json($record);
-        } catch (DNSException $e) {
-            return $this->json(['error' => $e->getMessage()], 400);
-        }
+            value: '192.0.2.1',
+            ttl: 3600,
+        ));
     }
 }
-Account Management
-php
-<?php
+```
 
-namespace App\Controller;
+### Account balance
 
+```php
 use Estratos\DomainApiInterface\Account\AccountProviderInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class AccountController extends AbstractController
+final class AccountController
 {
-    public function balance(AccountProviderInterface $accountProvider)
+    public function balance(AccountProviderInterface $accountProvider): array
     {
         $balance = $accountProvider->getBalance();
-        
-        return $this->json([
+
+        return [
             'balance' => $balance->balance,
             'currency' => $balance->currency,
             'available' => $balance->available,
-            'reserved' => $balance->reserved,
-        ]);
-    }
-    
-    public function prices(AccountProviderInterface $accountProvider)
-    {
-        $prices = $accountProvider->getPrices();
-        
-        return $this->json([
-            'currency' => $prices->currency,
-            'prices' => $prices->prices,
-        ]);
+        ];
     }
 }
-Event Subscribers
-php
-<?php
+```
 
-namespace App\EventSubscriber;
+### Events
 
+```php
 use Estratos\NameSiloBundle\Event\DomainRegisteredEvent;
-use Estratos\NameSiloBundle\Event\DomainRenewedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-class DomainEventSubscriber implements EventSubscriberInterface
+final class DomainSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents(): array
     {
         return [
             DomainRegisteredEvent::class => 'onDomainRegistered',
-            DomainRenewedEvent::class => 'onDomainRenewed',
         ];
     }
-    
+
     public function onDomainRegistered(DomainRegisteredEvent $event): void
     {
         $domain = $event->getDomain();
         $orderId = $event->getOrderId();
-        $registrationDate = $event->getRegistrationDate();
-        $expirationDate = $event->getExpirationDate();
-        
-        // Send notification email
-        // Log registration
-        // Update database
-    }
-    
-    public function onDomainRenewed(DomainRenewedEvent $event): void
-    {
-        $domain = $event->getDomain();
-        $orderId = $event->getOrderId();
-        $newExpirationDate = $event->getNewExpirationDate();
-        
-        // Update expiration date in database
-        // Send renewal confirmation
+        $expiresAt = $event->getExpirationDate();
     }
 }
-Error Handling
-php
+```
+
+## Error handling
+
+```php
+use Estratos\DomainApiInterface\Request\RegisterDomainRequest;
+use Estratos\NameSiloBundle\Exception\ApiException;
+use Estratos\NameSiloBundle\Exception\AuthenticationException;
+use Estratos\NameSiloBundle\Exception\InsufficientFundsException;
+use Estratos\NameSiloBundle\Exception\InvalidDomainException;
+use Estratos\NameSiloBundle\Exception\RateLimitException;
+use Estratos\NameSiloBundle\Exception\TimeoutException;
+use Estratos\NameSiloBundle\Exception\ValidationException;
+
+$request = new RegisterDomainRequest(
+    domain: 'example.com',
+    years: 1,
+    contactId: '12345',
+);
+
 try {
     $result = $domainProvider->register($request);
 } catch (AuthenticationException $e) {
-    // Invalid API key or credentials
+    // Invalid API key or IP not allowed.
 } catch (InsufficientFundsException $e) {
-    // Not enough funds in account
-    // $e->getRequiredAmount()
-    // $e->getAvailableBalance()
+    // $e->getRequiredAmount(), $e->getAvailableBalance()
 } catch (InvalidDomainException $e) {
-    // Invalid domain name format
     // $e->getErrors()
 } catch (RateLimitException $e) {
-    // Too many requests
     // $e->getRetryAfter()
+} catch (TimeoutException $e) {
+    // $e->getTimeout()
 } catch (ValidationException $e) {
-    // Validation errors in request
     // $e->getErrors()
 } catch (ApiException $e) {
-    // General API error
-    // $e->getEndpoint()
-    // $e->getStatusCode()
-    // $e->getRequestId()
+    // $e->getEndpoint(), $e->getStatusCode(), $e->getApiCode(), $e->getRequestId()
 }
-Testing
-bash
+```
+
+`ApiException::getApiCode()` returns the original numeric NameSilo code when available (`119`, `280`, ...).
+
+## Testing
+
+```bash
 composer test
-PHPStan Analysis
-bash
+```
+
+The suite uses `MockHttpClient`; no real API calls are made.
+
+## Static analysis and style
+
+```bash
 composer phpstan
-Code Style
-bash
 composer php-cs-fixer
 composer php-cs-fixer-fix
-License
-MIT License. See the LICENSE file for details.
+```
 
-Contributing
-Fork the repository
+## Documentation
 
-Create a feature branch
+Detailed technical documentation (Spanish):
 
-Write tests for your changes
+- [Architecture](docs/01-arquitectura.md)
+- [Configuration reference](docs/02-configuracion.md)
+- [Contracts and NameSilo API mapping](docs/03-contratos-y-api.md)
+- [Exceptions and enums](docs/04-excepciones-y-enums.md)
+- [Current state and next steps](docs/05-estado-y-roadmap.md)
 
-Ensure all tests pass
+## Notes and current limitations
 
-Submit a pull request
+- `estratos/namesilo-bundle` is not published on Packagist yet.
+- The suite is covered by mocks; run a real flow against the NameSilo sandbox before production.
+- NameSilo does not expose every field required by the contracts. The mapper derives or defaults some values (`orderId`, `updatedAt`, `available`, `reserved`, `creditLimit`).
+- `isDefault` on contacts has no NameSilo equivalent and is ignored with a warning.
+- MX priority uses `rrdistance`; SRV values are encoded as `weight:port:target`.
+
+## License
+
+MIT License. See [LICENSE](LICENSE).

@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Estratos\DomainApiInterface\Account\AccountProviderInterface;
+use Estratos\DomainApiInterface\Contact\ContactProviderInterface;
+use Estratos\DomainApiInterface\DNS\DNSProviderInterface;
+use Estratos\DomainApiInterface\Domain\DomainProviderInterface;
+use Estratos\DomainApiInterface\Lock\LockProviderInterface;
+use Estratos\DomainApiInterface\NameServer\NameServerProviderInterface;
+use Estratos\DomainApiInterface\Privacy\PrivacyProviderInterface;
 use Estratos\NameSiloBundle\Client\NameSiloClient;
 use Estratos\NameSiloBundle\Client\NameSiloClientInterface;
 use Estratos\NameSiloBundle\Mapper\ResponseMapper;
@@ -14,139 +21,84 @@ use Estratos\NameSiloBundle\Service\DomainService;
 use Estratos\NameSiloBundle\Service\LockService;
 use Estratos\NameSiloBundle\Service\NameServerService;
 use Estratos\NameSiloBundle\Service\PrivacyService;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 return function (ContainerConfigurator $container): void {
     $services = $container->services();
 
-    // HTTP Client
-    $services
-        ->set(HttpClientInterface::class)
+    $services->set('namesilo.http_client', HttpClientInterface::class)
         ->factory([HttpClient::class, 'create'])
-        ->args([
-            [
-                'timeout' => '%namesilo.timeout%',
-                'headers' => [
-                    'Accept' => 'application/%namesilo.response_type%',
-                ],
+        ->args([[
+            'timeout' => param('namesilo.timeout'),
+            'headers' => [
+                'Accept' => 'application/%namesilo.response_type%',
             ],
-        ])
+        ]])
     ;
 
-    // Client
-    $services
-        ->set(NameSiloClient::class)
-        ->args([
-            '%namesilo.api_key%',
-            '%namesilo.sandbox%',
-            '%namesilo.base_url%',
-            '%namesilo.timeout%',
-            '%namesilo.version%',
-            '%namesilo.response_type%',
-            service('logger'),
-            '%namesilo.logging%',
-            '%namesilo.retry%',
-            '%namesilo.cache%',
-        ])
-        ->alias(NameSiloClientInterface::class, NameSiloClient::class)
-        ->public()
+    $services->set('namesilo.cache', FilesystemAdapter::class)
+        ->args(['namesilo', 0, '%kernel.cache_dir%/namesilo'])
     ;
 
-    // Mapper
-    $services
-        ->set(ResponseMapper::class)
+    $services->set(NameSiloClient::class)
         ->args([
+            service('namesilo.http_client'),
             service('logger'),
+            param('namesilo.api_key'),
+            param('namesilo.sandbox'),
+            param('namesilo.base_url'),
+            param('namesilo.timeout'),
+            param('namesilo.version'),
+            param('namesilo.response_type'),
+            param('namesilo.logging'),
+            param('namesilo.retry'),
+            param('namesilo.cache'),
+            service('namesilo.cache'),
         ])
         ->public()
     ;
 
-    // Domain Service
-    $services
-        ->set(DomainService::class)
-        ->args([
-            service(NameSiloClientInterface::class),
-            service(ResponseMapper::class),
-            service(EventDispatcherInterface::class),
-            service('logger'),
-            '%namesilo.events%',
-        ])
+    $services->alias(NameSiloClientInterface::class, NameSiloClient::class)->public();
+    $services->alias('namesilo.client', NameSiloClient::class);
+
+    $services->set(ResponseMapper::class)
+        ->args([service('logger')])
         ->public()
     ;
 
-    // DNS Service
-    $services
-        ->set(DNSService::class)
-        ->args([
-            service(NameSiloClientInterface::class),
-            service(ResponseMapper::class),
-            service(EventDispatcherInterface::class),
-            service('logger'),
-            '%namesilo.events%',
-        ])
-        ->public()
-    ;
+    $services->alias('namesilo.mapper', ResponseMapper::class);
 
-    // Contact Service
-    $services
-        ->set(ContactService::class)
-        ->args([
-            service(NameSiloClientInterface::class),
-            service(ResponseMapper::class),
-            service(EventDispatcherInterface::class),
-            service('logger'),
-            '%namesilo.events%',
-        ])
-        ->public()
-    ;
+    $serviceArguments = [
+        service(NameSiloClient::class),
+        service(ResponseMapper::class),
+        service('event_dispatcher'),
+        service('logger'),
+        param('namesilo.events'),
+    ];
 
-    // Account Service
-    $services
-        ->set(AccountService::class)
-        ->args([
-            service(NameSiloClientInterface::class),
-            service(ResponseMapper::class),
-            service('logger'),
-        ])
-        ->public()
-    ;
+    $services->set(DomainService::class)->args($serviceArguments)->public();
+    $services->set(DNSService::class)->args($serviceArguments)->public();
+    $services->set(ContactService::class)->args($serviceArguments)->public();
+    $services->set(AccountService::class)->args($serviceArguments)->public();
+    $services->set(PrivacyService::class)->args($serviceArguments)->public();
+    $services->set(LockService::class)->args($serviceArguments)->public();
+    $services->set(NameServerService::class)->args($serviceArguments)->public();
 
-    // Privacy Service
-    $services
-        ->set(PrivacyService::class)
-        ->args([
-            service(NameSiloClientInterface::class),
-            service(ResponseMapper::class),
-            service(EventDispatcherInterface::class),
-            service('logger'),
-            '%namesilo.events%',
-        ])
-        ->public()
-    ;
+    $services->alias(DomainProviderInterface::class, DomainService::class)->public();
+    $services->alias(DNSProviderInterface::class, DNSService::class)->public();
+    $services->alias(ContactProviderInterface::class, ContactService::class)->public();
+    $services->alias(AccountProviderInterface::class, AccountService::class)->public();
+    $services->alias(PrivacyProviderInterface::class, PrivacyService::class)->public();
+    $services->alias(LockProviderInterface::class, LockService::class)->public();
+    $services->alias(NameServerProviderInterface::class, NameServerService::class)->public();
 
-    // Lock Service
-    $services
-        ->set(LockService::class)
-        ->args([
-            service(NameSiloClientInterface::class),
-            service(ResponseMapper::class),
-            service(EventDispatcherInterface::class),
-            service('logger'),
-            '%namesilo.events%',
-        ])
-        ->public()
-    ;
-
-    // NameServer Service
-    $services
-        ->set(NameServerService::class)
-        ->args([
-            service(NameSiloClientInterface::class),
-            service(ResponseMapper::class),
-            service('logger'),
-        ])
-        ->public()
-    ;
+    $services->alias('namesilo.service.domain', DomainService::class);
+    $services->alias('namesilo.service.dns', DNSService::class);
+    $services->alias('namesilo.service.contact', ContactService::class);
+    $services->alias('namesilo.service.account', AccountService::class);
+    $services->alias('namesilo.service.privacy', PrivacyService::class);
+    $services->alias('namesilo.service.lock', LockService::class);
+    $services->alias('namesilo.service.nameserver', NameServerService::class);
 };
