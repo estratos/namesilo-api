@@ -62,11 +62,6 @@ NameSilo API (https://www.namesilo.com/api/)
 
 ## Installation
 
-```bash
-composer require estratos/namesilo-api:dev-main
-```
-
-Once a new release containing the repaired implementation is tagged, the stable command will be:
 
 ```bash
 composer require estratos/namesilo-api
