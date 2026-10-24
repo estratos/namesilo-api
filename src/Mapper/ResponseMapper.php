@@ -114,14 +114,19 @@ final class ResponseMapper
     /**
      * @param array<string, mixed> $reply
      */
-    public function toDomainSummary(array $reply): DomainSummary
+    public function toDomainSummary(array $reply, string $defaultStatus = ''): DomainSummary
     {
         $createdAt = $this->date($reply, ['created', 'registration_date', 'registrationDate']);
         $expiresAt = $this->date($reply, ['expires', 'expiration_date', 'expirationDate'], $createdAt);
+        $status = $this->status($reply);
+
+        if ('' === $status) {
+            $status = $defaultStatus;
+        }
 
         return new DomainSummary(
             domain: $this->string($reply, ['domain']),
-            status: $this->status($reply),
+            status: $status,
             createdAt: $createdAt,
             expiresAt: $expiresAt,
             isLocked: $this->toBool($reply['locked'] ?? $reply['lock'] ?? null),
@@ -615,17 +620,28 @@ final class ResponseMapper
             $price = $this->findPrice($value);
 
             if ('' !== $tld && null !== $price) {
-                $prices[$tld] = $price;
+                $prices[$this->normalizeTld($tld)] = $price;
                 continue;
             }
 
             if (is_string($key) && null !== $price) {
-                $prices[$key] = $price;
+                $prices[$this->normalizeTld($key)] = $price;
                 continue;
             }
 
             $this->flattenPrices($value, $prices);
         }
+    }
+
+    private function normalizeTld(string $tld): string
+    {
+        $tld = strtolower(trim($tld));
+
+        if ('' === $tld) {
+            return '';
+        }
+
+        return str_starts_with($tld, '.') ? $tld : '.' . $tld;
     }
 
     /**

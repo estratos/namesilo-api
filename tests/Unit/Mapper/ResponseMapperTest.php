@@ -153,6 +153,21 @@ final class ResponseMapperTest extends TestCase
         self::assertSame(12.99, $prices->getPrice('.net'));
     }
 
+    public function testItNormalizesTopLevelTldPriceKeys(): void
+    {
+        $prices = $this->mapper->toPriceList([
+            'code' => 300,
+            'detail' => 'success',
+            'com' => [
+                'registration' => '17.29',
+                'renew' => '17.29',
+                'transfer' => '10.80',
+            ],
+        ]);
+
+        self::assertSame(17.29, $prices->getPrice('.com'));
+    }
+
     public function testItMapsLockAndPrivacyStatuses(): void
     {
         $lock = $this->mapper->toLockStatus('example.com', ['code' => 252], true);

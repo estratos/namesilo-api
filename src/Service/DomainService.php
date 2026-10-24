@@ -129,7 +129,7 @@ final class DomainService extends AbstractService implements DomainProviderInter
         $domains = $reply['domains'] ?? $reply['domain'] ?? [];
 
         return array_map(
-            fn (array $domain): DomainSummary => $this->mapper->toDomainSummary($domain),
+            fn (array $domain): DomainSummary => $this->mapper->toDomainSummary($domain, 'active'),
             $this->normalizeList($domains)
         );
     }
@@ -140,7 +140,7 @@ final class DomainService extends AbstractService implements DomainProviderInter
         $domains = $reply['domains'] ?? $reply['domain'] ?? [];
 
         return array_map(
-            fn (array $domain): DomainSummary => $this->mapper->toDomainSummary($domain),
+            fn (array $domain): DomainSummary => $this->mapper->toDomainSummary($domain, 'active'),
             $this->normalizeList($domains)
         );
     }

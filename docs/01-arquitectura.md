@@ -354,7 +354,7 @@ Los enums siguen sin integrarse en el flujo principal. El mapper normaliza estad
 El detalle está en [05-estado-y-roadmap.md](05-estado-y-roadmap.md). En resumen:
 
 1. Publicar una nueva etiqueta con la reparación.
-2. Probar contra el sandbox real.
+2. Validar las operaciones de escritura y el sandbox (las lecturas ya se probaron contra la API real).
 3. Integrar o eliminar los enums.
 4. Añadir CI.
 5. Cubrir casos límite de la API.

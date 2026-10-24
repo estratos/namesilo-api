@@ -47,6 +47,9 @@ First functional release. The published `1.0.0` was a skeleton: the classes regi
 - `NameSiloBundle::getContainerExtension()` explicitly returns `NameSiloExtension`, required on Symfony 7.4.
 - Fixed the invalid `->example(30)` configuration example.
 - Fixed contact mapping (`cp`, `ad2`, `fx`) and DNS mapping (`rrdistance`, SRV `weight:port:target`).
+- Normalized top-level TLD price keys to the `.tld` form used by `PriceList::getPrice()`.
+- Added an `active` status fallback for `listDomains` / `listDomainsByExpirationDate`, whose payloads omit `status`.
+- Transport errors no longer include the API key in exception messages.
 - Removed duplicate service definitions and overlapping aliases.
 
 ### Removed
@@ -65,15 +68,16 @@ First functional release. The published `1.0.0` was a skeleton: the classes regi
 
 ### Verification
 
-- 30 tests, 116 assertions, OK.
+- 32 tests, 120 assertions, OK.
 - PHPStan `max` with no errors.
 - Symfony container compiled in the integration test.
 - `composer validate` passes.
 - `php -l` passes for `src/` and `tests/`.
+- Read-only flows validated against the production API on 2026-10-24: balance, prices, domains, contacts, availability and domain info.
 
 ### Known limitations
 
-- Tests use mocks; a real flow against the NameSilo sandbox still needs to be validated.
+- Tests use mocks; read-only flows were validated against the production API, but mutation flows and the NameSilo sandbox still need validation.
 - The `ApiResponseCode`, `DomainStatus`, `LockStatus` and `PrivacyStatus` enums are not used in the main flow.
 - Some DTO fields are derived or defaulted (`orderId`, `updatedAt`, `available`, `reserved`, `creditLimit`).
 - `isDefault` on contacts has no NameSilo equivalent and is ignored with a warning.

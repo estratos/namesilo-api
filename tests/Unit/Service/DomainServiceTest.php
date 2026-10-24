@@ -108,6 +108,7 @@ final class DomainServiceTest extends TestCase
 
         self::assertCount(1, $domains);
         self::assertSame('example.com', $domains[0]->domain);
+        self::assertSame('active', $domains[0]->status);
         self::assertTrue($domains[0]->isLocked);
     }
 

@@ -11,7 +11,7 @@ Documentación técnica de `estratos/namesilo-api`, un bundle de Symfony que imp
 | PHP | `>= 8.3` |
 | Symfony | `^7.0` |
 | Contratos | `estratos/domain-api-interface` `^1.0` |
-| Última verificación | 2026-10-23: 30 tests, 116 aserciones, PHPStan `max` sin errores |
+| Última verificación | 2026-10-24: 32 tests, 120 aserciones, PHPStan `max` sin errores; lectura real validada |
 
 ## 1. Qué es
 
@@ -39,13 +39,13 @@ La separación de capas es correcta: los contratos y DTOs viven en `estratos/dom
 - Los 7 servicios de contrato: dominio, DNS, contacto, cuenta, privacidad, lock y nameservers.
 - 13 clases de evento y despacho condicionado por `events.enabled` / `events_to_dispatch`.
 - `ApiExceptionFactory` con mapeo de códigos NameSilo a excepciones.
-- Tests unitarios y de integración: 30 tests, 116 aserciones.
+- Tests unitarios y de integración: 32 tests, 120 aserciones.
 - PHPStan nivel `max` sin errores.
 
 ### 2.2 Pendiente
 
 - Publicar una nueva etiqueta en Packagist con la reparación (la `1.0.0` actual es anterior).
-- Validar las operaciones reales contra el sandbox de NameSilo (los tests usan fixtures/mocks).
+- Validar las operaciones de escritura (registro, renovación, DNS, contactos, privacidad, lock) y el sandbox. Las lecturas ya se validaron contra la API real el 2026-10-24.
 - Revisar los enums `ApiResponseCode`, `DomainStatus`, `LockStatus` y `PrivacyStatus`: existen, pero siguen sin usarse en el flujo principal y no mapean directamente los valores de NameSilo.
 - Añadir CI (GitHub Actions) con PHP 8.3/8.4 y Symfony 7.x.
 - Completar la cobertura de casos límite de la API (paginación, contactos especiales, TLDs con reglas propias).
@@ -68,7 +68,7 @@ Ninguno para ejecutar el bundle. El paquete está publicado, pero la versión es
 | Eventos | ✅ | 13 eventos y despacho configurable. |
 | Enums | 🟡 | Existen, pero no se usan en el flujo principal ni mapean los códigos numéricos de NameSilo. |
 | Excepciones | ✅ | Jerarquía + fábrica de errores + `getApiCode()`. |
-| Tests | ✅ | 30 tests, 116 aserciones. |
+| Tests | ✅ | 32 tests, 120 aserciones. |
 | README | ✅ | Reescrito para reflejar el estado real. |
 
 Leyenda: ✅ implementado · 🟡 implementado con deuda · ❌ no existe.
@@ -123,7 +123,7 @@ namesilo:
 
 - **Hechos de código:** se describen con referencia al archivo y línea.
 - **Diseño:** cuando se explica una decisión, se indica el motivo.
-- **API NameSilo:** las operaciones y parámetros se contrastaron con la [documentación oficial](https://www.namesilo.com/api-reference); los tests usan mocks, no llamadas reales.
+- **API NameSilo:** las operaciones y parámetros se contrastaron con la [documentación oficial](https://www.namesilo.com/api-reference); los tests usan mocks y las lecturas se validaron además contra la API real (2026-10-24).
 - **Estado:** los iconos ✅/🟡/❌ resumen el estado, no una valoración de calidad.
 
 ## 7. Glosario

@@ -7,9 +7,11 @@ namespace Estratos\NameSiloBundle\Tests\Unit\Client;
 use Estratos\NameSiloBundle\Client\NameSiloClient;
 use Estratos\NameSiloBundle\Exception\ApiException;
 use Estratos\NameSiloBundle\Exception\InsufficientFundsException;
+use Estratos\NameSiloBundle\Exception\TimeoutException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
@@ -183,6 +185,25 @@ XML;
         } catch (ApiException $exception) {
             self::assertSame(999, $exception->getApiCode());
             self::assertSame('getDomainInfo', $exception->getEndpoint());
+        }
+    }
+
+    public function testTransportErrorsDoNotLeakTheApiKey(): void
+    {
+        $httpClient = new MockHttpClient(static function (): MockResponse {
+            throw new TransportException(
+                'SSL problem for "https://www.namesilo.com/api/getAccountBalance?key=api-key"'
+            );
+        });
+
+        $client = $this->createClient($httpClient);
+
+        try {
+            $client->request('getAccountBalance');
+            self::fail('A TimeoutException should have been thrown.');
+        } catch (TimeoutException $exception) {
+            self::assertStringNotContainsString('api-key', $exception->getMessage());
+            self::assertSame('getAccountBalance', $exception->getEndpoint());
         }
     }
 

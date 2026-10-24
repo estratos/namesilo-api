@@ -6,7 +6,7 @@ Este documento conecta tres piezas:
 2. Los objetos de datos que recibe y devuelve la aplicación.
 3. Las operaciones reales de la API de NameSilo que hay detrás.
 
-> **Importante:** el cliente, el mapper y los 7 servicios están implementados. Las firmas de los contratos y los DTOs son reales (v1.0.0); el mapeo a operaciones NameSilo se contrastó con la [documentación oficial](https://www.namesilo.com/api-reference) y está cubierto por tests con mocks. La validación contra el sandbox real queda pendiente.
+> **Importante:** el cliente, el mapper y los 7 servicios están implementados. Las firmas de los contratos y los DTOs son reales (v1.0.0); el mapeo a operaciones NameSilo se contrastó con la [documentación oficial](https://www.namesilo.com/api-reference), está cubierto por tests con mocks y las lecturas se validaron contra la API real el 2026-10-24. Las mutaciones y el sandbox siguen pendientes.
 
 ## 1. Fuente de los contratos
 

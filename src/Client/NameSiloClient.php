@@ -192,12 +192,16 @@ final class NameSiloClient implements NameSiloClientInterface
                     continue;
                 }
 
+                $this->log('error', 'NameSilo transport error', [
+                    'endpoint' => $endpoint,
+                    'request_id' => $requestId,
+                    'error' => $this->maskSensitiveText($exception->getMessage()),
+                ]);
+
                 throw new TimeoutException(
                     $this->timeout,
-                    sprintf('NameSilo request failed: %s', $exception->getMessage()),
-                    $endpoint,
-                    $requestId,
-                    $exception
+                    endpoint: $endpoint,
+                    requestId: $requestId
                 );
             }
         }
@@ -421,7 +425,7 @@ final class NameSiloClient implements NameSiloClientInterface
         } catch (\Throwable $exception) {
             $this->log('warning', 'NameSilo cache read failed', [
                 'endpoint' => $endpoint,
-                'error' => $exception->getMessage(),
+                'error' => $this->maskSensitiveText($exception->getMessage()),
             ]);
 
             return null;
@@ -446,7 +450,7 @@ final class NameSiloClient implements NameSiloClientInterface
         } catch (\Throwable $exception) {
             $this->log('warning', 'NameSilo cache write failed', [
                 'endpoint' => $endpoint,
-                'error' => $exception->getMessage(),
+                'error' => $this->maskSensitiveText($exception->getMessage()),
             ]);
         }
     }
@@ -461,7 +465,7 @@ final class NameSiloClient implements NameSiloClientInterface
             $this->cachePool->clear();
         } catch (\Throwable $exception) {
             $this->log('warning', 'NameSilo cache purge failed', [
-                'error' => $exception->getMessage(),
+                'error' => $this->maskSensitiveText($exception->getMessage()),
             ]);
         }
     }
@@ -514,7 +518,16 @@ final class NameSiloClient implements NameSiloClientInterface
             return $url;
         }
 
-        return preg_replace('/([?&]key=)[^&]*/i', '$1***', $url) ?? $url;
+        return $this->maskSensitiveText($url);
+    }
+
+    private function maskSensitiveText(string $text): string
+    {
+        if ('' !== $this->apiKey) {
+            $text = str_replace($this->apiKey, '***', $text);
+        }
+
+        return preg_replace('/([?&]key=)[^&\s]*/i', '$1***', $text) ?? $text;
     }
 
     /**

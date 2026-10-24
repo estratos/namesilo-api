@@ -16,13 +16,14 @@ El bundle fue reparado y ahora es funcional en una aplicación Symfony que lo in
 | Comprobación | Resultado |
 |---|---|
 | `php -l` sobre `src/` y `tests/` | Sin errores |
-| PHPUnit | 30 tests, 116 aserciones, OK |
+| PHPUnit | 32 tests, 120 aserciones, OK |
 | PHPStan | Nivel `max`, sin errores |
 | `composer validate` | `composer.json` válido |
 | Contenedor Symfony | Compila; los 7 contratos y `NameSiloClient` se resuelven |
 | Autoload PSR-4 | `NameSiloBundle`, cliente, mapper y servicios se cargan correctamente |
+| API real (solo lectura) | OK 2026-10-24: balance, precios, dominios, contactos, disponibilidad y domain info |
 
-Los tests usan `MockHttpClient` y un cliente de grabación; no hacen llamadas reales a NameSilo.
+Los tests usan `MockHttpClient` y un cliente de grabación. Además, las lecturas se validaron contra la API real; las mutaciones no se han ejecutado.
 
 ## 3. Hallazgos resueltos
 
@@ -45,7 +46,7 @@ Los tests usan `MockHttpClient` y un cliente de grabación; no hacen llamadas re
 ### P1 — Distribución
 
 - **Publicar una nueva etiqueta.** El paquete ya está en Packagist como `estratos/namesilo-api`, pero la versión estable `1.0.0` es anterior a la reparación. Publica, por ejemplo, `1.1.0` para que `composer require estratos/namesilo-api` instale el código reparado. Mientras tanto, `dev-main` ya contiene los cambios.
-- **Validar en sandbox.** Ejecutar un flujo real de consulta, registro, DNS y lock contra el sandbox de NameSilo. Los tests actuales son unitarios/integración con mocks.
+- **Validar mutaciones y sandbox.** Las lecturas ya se validaron contra la API real (2026-10-24). Falta ejecutar registro, renovación, DNS, contactos, privacidad y lock en un entorno de pruebas, y confirmar el sandbox cuando haya credenciales.
 
 ### P2 — Robustez de la API
 
@@ -53,7 +54,7 @@ Los tests usan `MockHttpClient` y un cliente de grabación; no hacen llamadas re
 - **`DomainSummary` y N+1.** Si `listDomains` no devuelve lock/privacidad/fechas, el mapper usa valores derivados. Evaluar si conviene llamar a `getDomainInfo` por dominio o aceptar el coste.
 - **`orderId` y `transactionId`.** NameSilo no siempre devuelve un identificador de orden; el servicio devuelve cadena vacía si no existe. Definir si se generará un UUID local.
 - **`AccountBalance` derivado.** `available = balance`, `reserved = 0.0`, `creditLimit = null` cuando NameSilo no los envía.
-- **Contactos especiales.** `isDefault` se ignora con warning; `organization`, `address2` y `fax` se mapean a `cp`, `ad2` y `fx`. Verificar en sandbox que NameSilo los acepta.
+- **Contactos especiales.** `isDefault` se ignora con warning; `organization`, `address2` y `fax` se mapean a `cp`, `ad2` y `fx`. Verificar en pruebas de escritura que NameSilo los acepta.
 - **Transferencias.** Confirmar el nombre del parámetro del código EPP y los estados reales de `checkTransferStatus`.
 
 ### P2 — Enums
@@ -90,13 +91,13 @@ Recomendación: mantener los que aporten valor (`DomainStatus`) y eliminar los q
 
 1. **Duplicar compras por reintentos.** El cliente no reintenta errores de negocio ni operaciones de compra, pero una capa superior podría hacerlo. Documentar la idempotencia.
 2. **Filtrar la API key.** Viaja en la query string; el cliente enmascara la URL en logs, pero la aplicación no debe registrar URLs completas.
-3. **Variación de la API real.** Los tests usan fixtures; el sandbox puede devolver estructuras distintas. Validar antes de producción.
+3. **Variación de la API real.** Las lecturas ya se contrastaron con la API real, pero las mutaciones y el sandbox pueden devolver estructuras distintas.
 4. **Caché obsoleta.** El TTL por defecto es 300 s; para saldo/precios conviene bajarlo. Las mutaciones limpian la caché del namespace.
 5. **Datos derivados.** `updatedAt`, `orderId`, `available`, `reserved` y `creditLimit` pueden no venir de NameSilo; están documentados como derivados.
 
 ## 6. Próximos pasos recomendados
 
-1. Ejecutar un flujo real contra el sandbox con credenciales de prueba.
+1. Validar las mutaciones en un entorno de pruebas o sandbox.
 2. Ajustar el mapper si la respuesta real difiere de los fixtures.
 3. Publicar una nueva etiqueta con la reparación.
 4. Añadir CI.
@@ -113,7 +114,8 @@ Recomendación: mantener los que aporten valor (`DomainStatus`) y eliminar los q
 - [x] README y documentación reflejan el estado real.
 - [x] Paquete publicado en Packagist como `estratos/namesilo-api`.
 - [ ] Nueva etiqueta con la reparación publicada.
-- [ ] Flujo validado contra sandbox.
+- [x] Lectura real validada (balance, precios, dominios, contactos, disponibilidad, domain info).
+- [ ] Mutaciones y sandbox validados.
 - [ ] CI configurada.
 - [ ] Enums integrados o eliminados.
 - [ ] Paginación/N+1 resueltos o documentados.

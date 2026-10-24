@@ -320,7 +320,7 @@ Detailed technical documentation (Spanish):
 ## Notes and current limitations
 
 - The latest Packagist release (`1.0.0`) predates this repair; use `dev-main` or a new tag.
-- The suite is covered by mocks; run a real flow against the NameSilo sandbox before production.
+- Read-only flows (balance, prices, domains, contacts, availability and domain info) were validated against the production API on 2026-10-24. Mutation flows and the sandbox remain unvalidated.
 - NameSilo does not expose every field required by the contracts. The mapper derives or defaults some values (`orderId`, `updatedAt`, `available`, `reserved`, `creditLimit`).
 - `isDefault` on contacts has no NameSilo equivalent and is ignored with a warning.
 - MX priority uses `rrdistance`; SRV values are encoded as `weight:port:target`.

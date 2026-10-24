@@ -47,6 +47,10 @@
 /.composer-home/
 /.composer-cache/
 
+# Local environment / sandbox credentials
+/.env.local
+/.env.*.local
+
 # Build data
 /build/
 
