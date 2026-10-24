@@ -1,13 +1,13 @@
 # NameSilo Bundle — Documentación
 
-Documentación técnica de `estratos/namesilo-bundle`, un bundle de Symfony que implementa los contratos de `estratos/domain-api-interface` sobre la API de NameSilo.
+Documentación técnica de `estratos/namesilo-api`, un bundle de Symfony que implementa los contratos de `estratos/domain-api-interface` sobre la API de NameSilo.
 
-> **Estado:** implementación funcional. El cliente HTTP, el mapper, los 7 servicios, los eventos y la caché están implementados y cubiertos por tests. Queda pendiente la publicación en Packagist y la validación contra el sandbox real.
+> **Estado:** implementación funcional. El cliente HTTP, el mapper, los 7 servicios, los eventos y la caché están implementados y cubiertos por tests. El paquete está publicado en Packagist como `estratos/namesilo-api`; la etiqueta `1.0.0` es anterior a esta reparación, así que hay que usar `dev-main` hasta publicar una nueva versión.
 
 | Campo | Valor |
 |---|---|
 | Repositorio | `C:\Users\julio\local-repos\namesilo-api` |
-| Paquete Composer | `estratos/namesilo-bundle` |
+| Paquete Composer | `estratos/namesilo-api` |
 | PHP | `>= 8.3` |
 | Symfony | `^7.0` |
 | Contratos | `estratos/domain-api-interface` `^1.0` |
@@ -44,7 +44,7 @@ La separación de capas es correcta: los contratos y DTOs viven en `estratos/dom
 
 ### 2.2 Pendiente
 
-- Publicar el paquete en Packagist o documentar la instalación VCS de forma definitiva.
+- Publicar una nueva etiqueta en Packagist con la reparación (la `1.0.0` actual es anterior).
 - Validar las operaciones reales contra el sandbox de NameSilo (los tests usan fixtures/mocks).
 - Revisar los enums `ApiResponseCode`, `DomainStatus`, `LockStatus` y `PrivacyStatus`: existen, pero siguen sin usarse en el flujo principal y no mapean directamente los valores de NameSilo.
 - Añadir CI (GitHub Actions) con PHP 8.3/8.4 y Symfony 7.x.
@@ -52,7 +52,7 @@ La separación de capas es correcta: los contratos y DTOs viven en `estratos/dom
 
 ### 2.3 Bloqueos
 
-Ninguno para ejecutar el bundle en una aplicación Symfony que lo instale por VCS. El único bloqueo de distribución es que `estratos/namesilo-bundle` todavía no existe en Packagist, por lo que `composer require estratos/namesilo-bundle` falla.
+Ninguno para ejecutar el bundle. El paquete está publicado, pero la versión estable `1.0.0` es anterior a la reparación; usa `dev-main` o espera a la nueva etiqueta.
 
 ## 3. Estado por componente
 
@@ -85,24 +85,16 @@ Leyenda: ✅ implementado · 🟡 implementado con deuda · ❌ no existe.
 
 ## 5. Instalación
 
-El paquete aún no está publicado en Packagist. Mientras tanto, en la aplicación consumidora:
-
-```json
-{
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/estratos/namesilo-api"
-        }
-    ],
-    "require": {
-        "estratos/namesilo-bundle": "dev-main"
-    }
-}
-```
+Mientras la nueva etiqueta no esté publicada:
 
 ```bash
-composer update estratos/namesilo-bundle
+composer require estratos/namesilo-api:dev-main
+```
+
+Cuando se publique una versión con la reparación, bastará con:
+
+```bash
+composer require estratos/namesilo-api
 ```
 
 Después:

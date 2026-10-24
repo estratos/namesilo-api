@@ -2,7 +2,7 @@
 
 ## 1. Resumen
 
-El bundle fue reparado y ahora es funcional en una aplicación Symfony que lo instale por VCS:
+El bundle fue reparado y ahora es funcional en una aplicación Symfony que lo instale desde Packagist usando `dev-main` (o una nueva etiqueta con la reparación):
 
 - Se corrigió el nombre PSR-4 del bundle (`src/NameSiloBundle.php`).
 - Se unificó el wiring en `services.php`.
@@ -44,7 +44,7 @@ Los tests usan `MockHttpClient` y un cliente de grabación; no hacen llamadas re
 
 ### P1 — Distribución
 
-- **Publicar en Packagist.** Hoy `composer require estratos/namesilo-bundle` falla porque el paquete no existe en Packagist. Mientras tanto, la instalación por VCS está documentada en [docs/README.md](README.md#5-instalación).
+- **Publicar una nueva etiqueta.** El paquete ya está en Packagist como `estratos/namesilo-api`, pero la versión estable `1.0.0` es anterior a la reparación. Publica, por ejemplo, `1.1.0` para que `composer require estratos/namesilo-api` instale el código reparado. Mientras tanto, `dev-main` ya contiene los cambios.
 - **Validar en sandbox.** Ejecutar un flujo real de consulta, registro, DNS y lock contra el sandbox de NameSilo. Los tests actuales son unitarios/integración con mocks.
 
 ### P2 — Robustez de la API
@@ -98,7 +98,7 @@ Recomendación: mantener los que aporten valor (`DomainStatus`) y eliminar los q
 
 1. Ejecutar un flujo real contra el sandbox con credenciales de prueba.
 2. Ajustar el mapper si la respuesta real difiere de los fixtures.
-3. Publicar el paquete en Packagist o mantener la instalación VCS.
+3. Publicar una nueva etiqueta con la reparación.
 4. Añadir CI.
 5. Decidir el futuro de los enums.
 6. Revisar la paginación y el N+1 en listados.
@@ -111,7 +111,8 @@ Recomendación: mantener los que aporten valor (`DomainStatus`) y eliminar los q
 - [x] PHPStan `max` sin errores.
 - [x] `composer validate` correcto.
 - [x] README y documentación reflejan el estado real.
-- [ ] Paquete publicado en Packagist (o instalación VCS definitiva).
+- [x] Paquete publicado en Packagist como `estratos/namesilo-api`.
+- [ ] Nueva etiqueta con la reparación publicada.
 - [ ] Flujo validado contra sandbox.
 - [ ] CI configurada.
 - [ ] Enums integrados o eliminados.
@@ -121,7 +122,7 @@ Recomendación: mantener los que aporten valor (`DomainStatus`) y eliminar los q
 
 | Decisión | Opciones | Recomendación |
 |---|---|---|
-| Publicación | Packagist vs. VCS | Packagist si el repo es público. |
+| Nueva versión | Etiqueta `1.1.0` vs. dejar `dev-main` | Publicar `1.1.0`. |
 | Enums | Integrar vs. eliminar | Mantener `DomainStatus`; eliminar duplicados de DTOs. |
 | Paginación | Iterar todo vs. límite documentado | Iterar con límite configurable. |
 | `orderId` | Campo de NameSilo vs. UUID local | UUID local si NameSilo no lo garantiza. |

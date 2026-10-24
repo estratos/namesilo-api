@@ -6,7 +6,7 @@
 
 NameSilo API integration for Symfony, built on top of the contracts from [`estratos/domain-api-interface`](https://github.com/estratos/domain-api-interface).
 
-> **Status:** the core implementation is complete: HTTP client, response mapper, the 7 contract services, events, cache, retries and tests. The package is not yet published on Packagist, so install it through a VCS repository (see [Installation](#installation)).
+> **Status:** the core implementation is complete: HTTP client, response mapper, the 7 contract services, events, cache, retries and tests. The package is published on Packagist as [`estratos/namesilo-api`](https://packagist.org/packages/estratos/namesilo-api). The latest tagged release (`1.0.0`) predates this repair, so use `dev-main` until a new tag is published.
 
 ## Overview
 
@@ -31,7 +31,7 @@ Application
 estratos/domain-api-interface
     │ contracts, DTOs and request objects
     ▼
-estratos/namesilo-bundle
+estratos/namesilo-api
     ├── DomainService, DNSService, ContactService, AccountService,
     │   PrivacyService, LockService, NameServerService
     ├── ResponseMapper
@@ -62,24 +62,14 @@ NameSilo API (https://www.namesilo.com/api/)
 
 ## Installation
 
-The package is not on Packagist yet. Add the repository to the consuming application:
-
-```json
-{
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/estratos/namesilo-api"
-        }
-    ],
-    "require": {
-        "estratos/namesilo-bundle": "dev-main"
-    }
-}
+```bash
+composer require estratos/namesilo-api:dev-main
 ```
 
+Once a new release containing the repaired implementation is tagged, the stable command will be:
+
 ```bash
-composer update estratos/namesilo-bundle
+composer require estratos/namesilo-api
 ```
 
 Register the bundle:
@@ -329,7 +319,7 @@ Detailed technical documentation (Spanish):
 
 ## Notes and current limitations
 
-- `estratos/namesilo-bundle` is not published on Packagist yet.
+- The latest Packagist release (`1.0.0`) predates this repair; use `dev-main` or a new tag.
 - The suite is covered by mocks; run a real flow against the NameSilo sandbox before production.
 - NameSilo does not expose every field required by the contracts. The mapper derives or defaults some values (`orderId`, `updatedAt`, `available`, `reserved`, `creditLimit`).
 - `isDefault` on contacts has no NameSilo equivalent and is ignored with a warning.

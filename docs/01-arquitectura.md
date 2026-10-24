@@ -16,7 +16,7 @@ El bundle ocupa la capa de infraestructura de un diseño por contratos:
 └──────────────────────────────▲───────────────────────────────┘
                                │ implementan
 ┌──────────────────────────────┴───────────────────────────────┐
-│ estratos/namesilo-bundle (este repositorio)                  │
+│ estratos/namesilo-api (este repositorio)                    │
 │                                                              │
 │  DomainService  DNSService  ContactService  AccountService   │
 │  PrivacyService  LockService  NameServerService              │
@@ -353,7 +353,7 @@ Los enums siguen sin integrarse en el flujo principal. El mapper normaliza estad
 
 El detalle está en [05-estado-y-roadmap.md](05-estado-y-roadmap.md). En resumen:
 
-1. Publicar en Packagist.
+1. Publicar una nueva etiqueta con la reparación.
 2. Probar contra el sandbox real.
 3. Integrar o eliminar los enums.
 4. Añadir CI.

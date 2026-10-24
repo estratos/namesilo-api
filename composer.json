@@ -1,5 +1,5 @@
 {
-    "name": "estratos/namesilo-bundle",
+    "name": "estratos/namesilo-api",
     "type": "symfony-bundle",
     "description": "NameSilo API Bundle for Symfony - Enterprise-grade domain registrar integration",
     "keywords": [
